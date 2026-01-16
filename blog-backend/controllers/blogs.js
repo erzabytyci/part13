@@ -8,9 +8,16 @@ const blogFinder = async (req, res, next) => {
 }
 
 router.get('/', async (req, res) => {
-    const blogs = await Blog.findAll({ order: [['id', 'ASC']] })
+    const blogs = await Blog.findAll({
+        order: [['id', 'ASC']],
+        include: {
+            model: require('../models').User,
+            attributes: ['id', 'name', 'username'],
+        },
+    })
     res.json(blogs)
 })
+
 
 router.post('/', userExtractor, async (req, res) => {
     const blog = await Blog.create({

@@ -18,9 +18,18 @@ router.post('/', async (req, res) => {
 
 
 router.get('/', async (req, res) => {
-    const users = await User.findAll({ order: [['id', 'ASC']] })
+    const users = await User.findAll({
+        order: [['id', 'ASC']],
+        attributes: ['id', 'name', 'username', 'createdAt', 'updatedAt'],
+        include: {
+            model: require('../models').Blog,
+            attributes: ['id', 'author', 'title', 'url', 'likes'],
+        },
+    })
+
     res.json(users)
 })
+
 
 router.put('/:username', async (req, res) => {
     const oldUsername = req.params.username
