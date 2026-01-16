@@ -29,6 +29,10 @@ const errorHandler = (error, req, res, next) => {
         return res.status(401).json({ error: error.message })
     }
 
+    if (error.name === 'ForbiddenError') {
+        return res.status(403).json({ error: error.message })
+    }
+
     console.error(error)
     return res.status(500).json({ error: 'internal server error' })
 }

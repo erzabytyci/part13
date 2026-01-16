@@ -21,13 +21,21 @@ router.post('/', userExtractor, async (req, res) => {
     res.status(201).json(blog)
 })
 
-
-router.delete('/:id', blogFinder, async (req, res) => {
-    if (req.blog) {
-        await req.blog.destroy()
-        return res.status(204).end()
+router.delete('/:id', userExtractor, blogFinder, async (req, res) => {
+    if (!req.blog) {
+        const err = new Error('blog not found')
+        err.name = 'NotFoundError'
+        throw err
     }
-    res.status(404).json({ error: 'blog not found' })
+
+    if (req.blog.userId !== req.user.id) {
+        const err = new Error('only the creator can delete this blog')
+        err.name = 'ForbiddenError'
+        throw err
+    }
+
+    await req.blog.destroy()
+    res.status(204).end()
 })
 
 router.put('/:id', blogFinder, async (req, res) => {
