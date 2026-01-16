@@ -1,10 +1,21 @@
+const bcrypt = require('bcrypt')
 const router = require('express').Router()
 const { User } = require('../models')
 
 router.post('/', async (req, res) => {
-    const user = await User.create(req.body)
+    const { name, username } = req.body
+
+    const passwordHash = await bcrypt.hash('secret', 10)
+
+    const user = await User.create({
+        name,
+        username,
+        passwordHash,
+    })
+
     res.status(201).json(user)
 })
+
 
 router.get('/', async (req, res) => {
     const users = await User.findAll({ order: [['id', 'ASC']] })

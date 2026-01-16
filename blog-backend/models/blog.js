@@ -31,6 +31,11 @@ Blog.init(
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
+        userId: {
+            type: DataTypes.INTEGER,
+            field: 'user_id',
+        },
+
     },
     {
         sequelize,

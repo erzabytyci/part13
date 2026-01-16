@@ -21,6 +21,12 @@ User.init(
             validate: { notEmpty: true, isEmail: true },
             unique: true,
         },
+        passwordHash: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+            field: 'password_hash',
+        },
+
     },
     {
         sequelize,
