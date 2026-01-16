@@ -12,13 +12,10 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-    try {
-        const blog = await Blog.create(req.body)
-        res.status(201).json(blog)
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
+    const blog = await Blog.create(req.body)
+    return res.status(201).json(blog)
 })
+
 
 router.delete('/:id', blogFinder, async (req, res) => {
     if (req.blog) {
@@ -30,14 +27,25 @@ router.delete('/:id', blogFinder, async (req, res) => {
 
 router.put('/:id', blogFinder, async (req, res) => {
     if (!req.blog) {
-        return res.status(404).json({ error: 'blog not found' })
+        const err = new Error('blog not found')
+        err.name = 'NotFoundError'
+        throw err
     }
 
     if (req.body.likes === undefined) {
-        return res.status(400).json({ error: 'likes missing' })
+        const err = new Error('likes missing')
+        err.name = 'BadRequestError'
+        throw err
     }
 
-    req.blog.likes = req.body.likes
+    const likes = Number(req.body.likes)
+    if (Number.isNaN(likes)) {
+        const err = new Error('likes must be a number')
+        err.name = 'BadRequestError'
+        throw err
+    }
+
+    req.blog.likes = likes
     await req.blog.save()
 
     res.json(req.blog)
