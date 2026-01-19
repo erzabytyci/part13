@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { JWT_SECRET } = require('./config')
-const { User } = require('../models')
+const { User, Session } = require('../models')
 
 const tokenExtractor = (req, res, next) => {
     const authorization = req.get('authorization')
@@ -19,8 +19,35 @@ const userExtractor = async (req, res, next) => {
         return next(err)
     }
 
-    const decodedToken = jwt.verify(req.token, JWT_SECRET)
-    req.user = await User.findByPk(decodedToken.id)
+    let decodedToken
+    try {
+        decodedToken = jwt.verify(req.token, JWT_SECRET)
+    } catch (error) {
+        return next(error)
+    }
+
+    const user = await User.findByPk(decodedToken.id)
+
+    if (!user) {
+        const err = new Error('user not found')
+        err.name = 'UnauthorizedError'
+        return next(err)
+    }
+
+    if (user.disabled) {
+        const err = new Error('user disabled')
+        err.name = 'UnauthorizedError'
+        return next(err)
+    }
+
+    const session = await Session.findOne({ where: { token: req.token } })
+    if (!session) {
+        const err = new Error('session expired')
+        err.name = 'UnauthorizedError'
+        return next(err)
+    }
+
+    req.user = user
     next()
 }
 
