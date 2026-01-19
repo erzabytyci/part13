@@ -30,6 +30,27 @@ router.get('/', async (req, res) => {
     res.json(users)
 })
 
+router.get('/:id', async (req, res) => {
+    const user = await User.findByPk(req.params.id, {
+        attributes: ['id', 'name', 'username'],
+        include: {
+            model: require('../models').Blog,
+            as: 'readings',
+            attributes: ['id', 'url', 'title', 'author', 'likes', 'year'],
+            through: {
+                attributes: [],
+            },
+        },
+    })
+
+    if (!user) {
+        const err = new Error('user not found')
+        err.name = 'NotFoundError'
+        throw err
+    }
+
+    res.json(user)
+})
 
 router.put('/:username', async (req, res) => {
     const oldUsername = req.params.username
