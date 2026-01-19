@@ -31,6 +31,12 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/:id', async (req, res) => {
+    const where = {}
+
+    if (req.query.read !== undefined) {
+        where.read = req.query.read === 'true'
+    }
+
     const user = await User.findByPk(req.params.id, {
         attributes: ['id', 'name', 'username'],
         include: {
@@ -39,6 +45,7 @@ router.get('/:id', async (req, res) => {
             attributes: ['id', 'url', 'title', 'author', 'likes', 'year'],
             through: {
                 attributes: ['id', 'read'],
+                where,
             },
         },
     })
@@ -51,6 +58,7 @@ router.get('/:id', async (req, res) => {
 
     res.json(user)
 })
+
 
 router.put('/:username', async (req, res) => {
     const oldUsername = req.params.username
